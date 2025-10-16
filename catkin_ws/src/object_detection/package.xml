@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>object_detection</name>
+  <version>0.0.0</version>
+  <description>Package pour la détection d'objets sur des images statiques.</description>
+  <maintainer email="fjego@enseirb-matmeca.fr">Votre Nom</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>opencv2</build_depend>
+
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>libopencv-dev</exec_depend>
+
+</package>
