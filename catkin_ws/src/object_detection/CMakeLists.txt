@@ -10,8 +10,9 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   geometry_msgs
   cv_bridge
+  roslib
+  OpenCV
 )
-find_package(OpenCV REQUIRED)
 
 # Define catkin package information
 catkin_package(
