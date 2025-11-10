@@ -18,6 +18,8 @@
 ```bash
 git branch                                  # Vérifie sur quelle branche tu es
 git checkout nom_de_ta_branche              # (Optionnel) Si tu n’es pas sur la bonne branche
+git fetch                                   # Reload le git
+git status                                  # Vérifie que t'as pas des commit de retard (git pull avant sinon)
 git add .                                   # Ajoute les fichiers modifiés
 git add chemin/vers/fichier                 # (ou pour ajouter un seul fichier)
 git commit -m "Ton message de commit ici"   # Fais ton commit avec un message
