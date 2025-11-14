@@ -1,0 +1,4 @@
+<launch>
+    <include file="$(find xarm6_moveit_config)/launch/move_group.launch" />
+    <node pkg="move_demo" type="move_node" name="move_node"/>
+</launch>

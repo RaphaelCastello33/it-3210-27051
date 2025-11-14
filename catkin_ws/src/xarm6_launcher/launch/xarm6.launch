@@ -7,4 +7,8 @@
 
   <!-- Inclut le launch du package 3 -->
   <include file="$(find object_detection)/launch/object_detection.launch"/>
+
+  <!-- Inclut le launch de démo -->
+  <include file="$(find move_demo)/launch/move_demo.launch"/>
+
 </launch>
