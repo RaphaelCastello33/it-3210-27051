@@ -13,4 +13,4 @@
 #include <ros/package.h>       // Pour utiliser les fonctions d'affichage des images (imread, imshow, etc.)
 
 using namespace cv;
-int mateo();
+int mateo(int argc, char** argv);

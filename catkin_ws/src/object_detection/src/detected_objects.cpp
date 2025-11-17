@@ -11,7 +11,7 @@ int main(int argc, char **argv)
 {
     //francois(argc, argv);
 
-    mateo();
+    mateo(argc, argv);
     return 0;
 }
 
