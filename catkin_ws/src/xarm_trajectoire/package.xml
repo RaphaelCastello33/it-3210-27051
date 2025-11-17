@@ -7,36 +7,28 @@
   <maintainer email="team@enseirb.fr">ENSEIRB Team</maintainer>
   <license>BSD</license>
 
-  <!-- Outil de build -->
+  <!-- OBLIGATOIRE -->
   <buildtool_depend>catkin</buildtool_depend>
 
-  <!-- Dépendances de build + run -->
+  <!-- Dépendances de build -->
   <build_depend>roscpp</build_depend>
-  <exec_depend>roscpp</exec_depend>
-
-  <build_depend>std_msgs</build_depend>
-  <exec_depend>std_msgs</exec_depend>
-
   <build_depend>geometry_msgs</build_depend>
-  <exec_depend>geometry_msgs</exec_depend>
-
   <build_depend>moveit_core</build_depend>
-  <exec_depend>moveit_core</exec_depend>
-
   <build_depend>moveit_ros_planning</build_depend>
-  <exec_depend>moveit_ros_planning</exec_depend>
-
   <build_depend>moveit_ros_planning_interface</build_depend>
-  <exec_depend>moveit_ros_planning_interface</exec_depend>
-
   <build_depend>moveit_msgs</build_depend>
-  <exec_depend>moveit_msgs</exec_depend>
-
-  <!-- Messages -->
   <build_depend>message_generation</build_depend>
+
+  <!-- Dépendances à l'exécution -->
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>moveit_core</exec_depend>
+  <exec_depend>moveit_ros_planning</exec_depend>
+  <exec_depend>moveit_ros_planning_interface</exec_depend>
+  <exec_depend>moveit_msgs</exec_depend>
   <exec_depend>message_runtime</exec_depend>
 
-  <!-- Pour utiliser la config xarm6 et la description robot -->
+  <!-- Packages nécessaires pour la description + MoveIt xArm6 -->
   <exec_depend>xarm6_moveit_config</exec_depend>
   <exec_depend>xarm_description</exec_depend>
 
