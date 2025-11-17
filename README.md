@@ -40,6 +40,14 @@ git push origin nom_de_ta_branche   # Pousse les changements vers ta branche dis
 
 ## Se connecter au robot
 
+```bash
+# verifier qu'on arrive a se connecter au robot
+ping 192.168.1.208
+
+# se connecter au robot
+roslaunch xarm_bringup xarm6_server.launch robot_ip:=192.168.1.208
+```
+
 ## Setup le robot apres connexion
 
 ```bash
@@ -54,5 +62,6 @@ rosservice call /xarm/set_state 0
 rosservice call /xarm/go_home [] 0.35 7 0 0
 
 # déplacer le robot
-rosservice call /xarm/move_line_tool [50,100,100,0,0,0] 200 2000 0 0 # delta_x = 50; delta_y = 100; delta_z = 100; vitesse = 200; accélération = 2000
+rosservice call /xarm/move_line_tool [50,100,100,0,0,0] 200 2000 0 0 
+# ici, on a : delta_x = 50; delta_y = 100; delta_z = 100; vitesse = 200; accélération = 2000
 ```
