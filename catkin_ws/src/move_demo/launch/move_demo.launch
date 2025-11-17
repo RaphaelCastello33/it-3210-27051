@@ -1,4 +1,7 @@
 <launch>
-    <include file="$(find xarm6_moveit_config)/launch/move_group.launch" />
-    <node pkg="move_demo" type="move_node" name="move_node"/>
+    <include file="$(find xarm_bringup)/launch/xarm6_server.launch">
+        <arg name="robot_ip" value="192.168.1.208"/>
+    </include>
+
+    <node pkg="move_demo" type="move_node" name="move_node" output="screen"/>
 </launch>
