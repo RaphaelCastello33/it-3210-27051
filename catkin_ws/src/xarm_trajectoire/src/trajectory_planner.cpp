@@ -3,20 +3,19 @@
 #include <moveit_msgs/RobotTrajectory.h>
 #include <geometry_msgs/Pose.h>
 
-
-#include <xarm_trajectoire/ObjectPos.h>
+// Messages générés
 #include <xarm_trajectoire/Data.h>
+#include <xarm_trajectoire/ObjectPos.h>
 
-// variables globales pour le callback
 xarm_trajectoire::Data g_data;
 bool g_data_received = false;
 
-// callback : reçoit les positions des objets
 void dataCallback(const xarm_trajectoire::Data::ConstPtr& msg)
 {
     g_data = *msg;
     g_data_received = true;
-    ROS_INFO("Données reçues : bleu(%.3f, %.3f, %.3f, present=%d), croix(%.3f, %.3f, %.3f)",
+
+    ROS_INFO("Data reçue : bleu(%.3f, %.3f, %.3f, present=%d) -> croix(%.3f, %.3f, %.3f)",
              g_data.bleu.x, g_data.bleu.y, g_data.bleu.z, g_data.bleu.present,
              g_data.croix.x, g_data.croix.y, g_data.croix.z);
 }
@@ -34,31 +33,30 @@ int main(int argc, char** argv)
     move_group.setMaxVelocityScalingFactor(0.3);
     move_group.setMaxAccelerationScalingFactor(0.3);
 
-    // Publisher
+    // Publisher de trajectoire pour le groupe suivant
     ros::Publisher traj_pub =
         nh.advertise<moveit_msgs::RobotTrajectory>("planned_trajectory", 1, true);
 
-    // Subscriber des données d'objets
+    // Subscriber vers les données des objets
     ros::Subscriber data_sub =
         nh.subscribe("object_data", 1, dataCallback);
 
     ROS_INFO("trajectory_planner en attente de /object_data ...");
 
-    // attendre au moins un message
+    // attendre qu'on ait reçu au moins une Data
     ros::Rate rate(10);
-    while (ros::ok() && !g_data_received) {
+    while (ros::ok() && !g_data_received)
+    {
         rate.sleep();
     }
-    if (!ros::ok())
-        return 0;
+    if (!ros::ok()) return 0;
 
-    // ici on utilise l'objet bleu en exemple
+    // ici on prend l'objet bleu comme exemple
     if (!g_data.bleu.present) {
         ROS_WARN("L'objet bleu n'est pas présent. Aucune trajectoire planifiée.");
         return 0;
     }
 
-    // construction de la trajectoire cartésienne
     std::vector<geometry_msgs::Pose> waypoints;
 
     geometry_msgs::Pose start_pose = move_group.getCurrentPose().pose;
@@ -73,7 +71,7 @@ int main(int argc, char** argv)
     geometry_msgs::Pose obj_grab = obj_above;
     obj_grab.position.z = g_data.bleu.z + 0.02;
 
-    // au-dessus de la destination
+    // au-dessus de la croix
     geometry_msgs::Pose dest_above = obj_above;
     dest_above.position.x = g_data.croix.x;
     dest_above.position.y = g_data.croix.y;
@@ -96,15 +94,15 @@ int main(int argc, char** argv)
     ROS_INFO("Fraction computed: %.2f", fraction);
 
     if (fraction > 0.95) {
-        // publication
+        // publier la trajectoire
         traj_pub.publish(trajectory);
         ROS_INFO("Trajectoire publiée sur /planned_trajectory.");
 
-        // exécution locale (pour voir le mouvement dans RViz)
+        // l'exécuter (RViz + vrai robot si realMove_exec.launch)
         moveit::planning_interface::MoveGroupInterface::Plan plan;
         plan.trajectory_ = trajectory;
         move_group.execute(plan);
-        ROS_INFO("Trajectoire exécutée dans MoveIt.");
+        ROS_INFO("Trajectoire exécutée.");
     } else {
         ROS_WARN("Trajectoire partielle (%.2f). Rien n'est publié ni exécuté.", fraction);
     }
