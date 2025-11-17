@@ -30,7 +30,7 @@
   <param name="$(arg namespace)/hw_ns" value="$(arg namespace)" />
   <param name="$(arg namespace)/joint_state_flags" type="int" value="$(arg joint_state_flags)" />
 
-  <node if="$(arg publish_tf)" name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+<node if="$(arg publish_tf)" pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"/>
   <node if="$(arg use_moveit)" name="uf_ros_controller" pkg="xarm_controller" type="uf_ros_controller" args="ip=$(arg robot_ip)" ns="$(arg namespace)" respawn="false" output="screen" />
   <node unless="$(arg use_moveit)" name="uf_driver" pkg="xarm_api" ns="$(arg namespace)" type="xarm_driver_node" output="screen" />
 

@@ -1,0 +1,14 @@
+<launch>
+  <!-- Inclut le launch du package 1 -->
+  <include file="$(find xarm_mouvement)/launch/xarm_mouvement.launch"/>
+
+  <!-- Inclut le launch du package 2 -->
+  <include file="$(find xarm_trajectoire)/launch/xarm_trajectoire.launch"/>
+
+  <!-- Inclut le launch du package 3 -->
+  <include file="$(find object_detection)/launch/object_detection.launch"/>
+
+  <!-- Inclut le launch de démo -->
+  <include file="$(find move_demo)/launch/move_demo.launch"/>
+
+</launch>

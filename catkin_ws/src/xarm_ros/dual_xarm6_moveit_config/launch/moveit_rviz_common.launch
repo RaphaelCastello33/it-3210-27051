@@ -35,7 +35,7 @@
 
   <!-- Load the URDF, SRDF and other .yaml configuration files on the param server, limit joint range within [-pi, pi] -->
   <include file="$(find dual_xarm6_moveit_config)/launch/planning_context.launch">
-    <arg name="load_robot_description" value="true"/>
+    <arg name="load_robot_description" value="false"/>
     <arg name="model1300_1" value="$(arg model1300_1)" />
     <arg name="model1300_2" value="$(arg model1300_2)" />
     <arg name="add_realsense_d435i_1" value="$(arg add_realsense_d435i_1)"/>
