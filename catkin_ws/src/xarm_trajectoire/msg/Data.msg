@@ -1,0 +1,4 @@
+xarm_trajectoire/ObjectPos bleu
+xarm_trajectoire/ObjectPos rouge
+xarm_trajectoire/ObjectPos vert
+xarm_trajectoire/ObjectPos croix

@@ -1,0 +1,19 @@
+rostopic pub /object_data xarm_trajectoire/Data "bleu:
+  x: 0.35
+  y: 0.10
+  z: 0.10
+  present: true
+rouge:
+  x: 0.0
+  y: 0.0
+  z: 0.0
+  present: false
+vert:
+  x: 0.0
+  y: 0.0
+  z: 0.0
+  present: false
+croix:
+  x: 0.50
+  y: 0.00
+  z: 0.10"
