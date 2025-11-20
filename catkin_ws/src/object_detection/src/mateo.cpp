@@ -2,6 +2,8 @@
 #include "object_detection/detected_image.hpp"
 #include "object_detection/mateo.hpp"
 
+#define OFFSET_X 25
+#define OFFSET_Y 50 
 
 bool readytoProcess = false;
 ros::Publisher ready_pub;
@@ -47,8 +49,8 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
         Moments m_rouge = moments(mask_rouge, true);
         if (m_rouge.m00 > 1000) {   // seuil pour éviter le bruit
-            int cx_rouge = m_rouge.m10 / m_rouge.m00;
-            int cy_rouge = m_rouge.m01 / m_rouge.m00;
+            int cx_rouge = m_rouge.m10 / m_rouge.m00 - OFFSET_X;
+            int cy_rouge = m_rouge.m01 / m_rouge.m00 + OFFSET_Y;
             circle(pieces, Point(cx_rouge, cy_rouge), 6, Scalar(0,0,0), -1);
             cout << "Centre rouge: (" << cx_rouge << ", " << cy_rouge << ")\n";
         }
@@ -60,8 +62,8 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
         Moments m_vert = moments(mask_vert, true);
         if (m_vert.m00 > 1000) {
-            int cx_vert = m_vert.m10 / m_vert.m00;
-            int cy_vert = m_vert.m01 / m_vert.m00;
+            int cx_vert = m_vert.m10 / m_vert.m00 - OFFSET_X;
+            int cy_vert = m_vert.m01 / m_vert.m00 + OFFSET_Y;
             cout << "Centre pièce verte : (" << cx_vert << ", " << cy_vert << ")" << endl;
             circle(pieces, Point(cx_vert, cy_vert), 6, Scalar(0, 0, 0), -1);
         }
@@ -72,8 +74,8 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
         Moments m_bleu = moments(mask_bleu, true);
         if (m_bleu.m00 > 1000) {
-            int cx_bleu = m_bleu.m10 / m_bleu.m00;
-            int cy_bleu = m_bleu.m01 / m_bleu.m00;
+            int cx_bleu = m_bleu.m10 / m_bleu.m00 - OFFSET_X;
+            int cy_bleu = m_bleu.m01 / m_bleu.m00 + OFFSET_Y;
             cout << "Centre pièce bleue : (" << cx_bleu << ", " << cy_bleu << ")" << endl;
             circle(pieces, Point(cx_bleu, cy_bleu), 6, Scalar(0, 0, 0), -1);
         }
@@ -84,8 +86,8 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
         Moments m_noir = moments(mask_noir, true);
         if (m_noir.m00 > 1000) {
-            int cx_noir = m_noir.m10 / m_noir.m00;
-            int cy_noir = m_noir.m01 / m_noir.m00;
+            int cx_noir = m_noir.m10 / m_noir.m00 - OFFSET_X;
+            int cy_noir = m_noir.m01 / m_noir.m00 + OFFSET_Y;
             cout << "Centre pièce noire : (" << cx_noir << ", " << cy_noir << ")" << endl;
             circle(pieces, Point(cx_noir, cy_noir), 6, Scalar(255, 255, 255), -1);
         }
