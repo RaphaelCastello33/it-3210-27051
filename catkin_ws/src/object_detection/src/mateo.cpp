@@ -4,13 +4,9 @@
 
 
 bool readytoProcess = false;
-ros::Publisher ready_pub;l
-
-void readyCallback(const std_msgs::Bool::ConstPtr& msg)
-{
-    readytoProcess = msg->data;
-    //readytoProcess = true;
-}
+ros::Publisher ready_pub;
+ros::Subscriber cam_sub;
+ros::NodeHandle* nh_ptr;
 
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
@@ -98,29 +94,45 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
             cout << "Aucune pièce noire détectée." << endl;
         }
 
-        imshow("Centres des pièces", filtre_rouge);
+        imshow("Centres des pièces", pieces);
         waitKey(1);
         readytoProcess = false; // reset flag
         ready_msg.data = false;
         ready_pub.publish(ready_msg);
+        cam_sub.shutdown(); // désabonnement du flux caméra
     }
 
+}
+
+void readyCallback(const std_msgs::Bool::ConstPtr& msg)
+{
+    readytoProcess = msg->data;
+    //readytoProcess = true;
+    cout << "Ready to process: " << readytoProcess << endl;
+    if(readytoProcess)
+    {
+        cam_sub = nh_ptr->subscribe("/camera/color/image_raw", 1, imageCallback);
+    }
 }
 
 int mateo(int argc, char** argv)
 {
     ros::init(argc, argv, "object_detector");
     ros::NodeHandle nh;
+    nh_ptr = &nh;
+
     cout << "Mateo node started." << endl;
 
     namedWindow("camera", WINDOW_AUTOSIZE);
+    imshow("Centres des pièces", Mat::zeros(480, 640, CV_8UC3));
+    waitKey(1);
 
     ready_pub = nh.advertise<std_msgs::Bool>("/processing_ready", 1);
 
     ros::Subscriber ready_sub = nh.subscribe("/processing_ready", 1, readyCallback);
 
     // Souscription au flux caméra
-    ros::Subscriber sub = nh.subscribe("/camera/color/image_raw", 1, imageCallback);
+    //ros::Subscriber sub = nh.subscribe("/camera/color/image_raw", 1, imageCallback);
 
     ros::spin();
     return 0;
