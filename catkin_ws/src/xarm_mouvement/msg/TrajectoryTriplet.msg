@@ -1,0 +1,3 @@
+trajectory_msgs/JointTrajectory to_object
+trajectory_msgs/JointTrajectory to_cross
+trajectory_msgs/JointTrajectory return_home
