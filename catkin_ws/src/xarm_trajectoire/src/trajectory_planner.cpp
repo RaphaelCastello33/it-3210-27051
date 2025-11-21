@@ -2,6 +2,7 @@
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit_msgs/RobotTrajectory.h>
 #include <geometry_msgs/Pose.h>
+#include <std_msgs/Bool.h>
 
 // Messages générés
 #include <xarm_trajectoire/Data.h>
@@ -37,9 +38,19 @@ int main(int argc, char** argv)
     ros::Publisher traj_pub =
         nh.advertise<moveit_msgs::RobotTrajectory>("planned_trajectory", 1, true);
 
+    // Topic de requête envoyé au groupe caméra
+    ros::Publisher req_pub =
+        nh.advertise<std_msgs::Bool>("request_object_data", 1, true);
+
     // Subscriber vers les données des objets
     ros::Subscriber data_sub =
         nh.subscribe("object_data", 1, dataCallback);
+
+    // envoit de la requete au groupe de la camera
+    std_msgs::Bool req;
+    req.data = true;
+    req_pub.publish(req);
+    ROS_INFO("trajectory_planner : requête envoyée sur /request_object_data");
 
     ROS_INFO("trajectory_planner en attente de /object_data ...");
 
