@@ -8,16 +8,24 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <!-- Dépendances pour compiler -->
   <build_depend>roscpp</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>cv_bridge</build_depend>
   <build_depend>opencv2</build_depend>
 
+  <!-- Nécessaires pour les messages -->
+  <build_depend>message_generation</build_depend>
+
+  <!-- Dépendances pour exécuter -->
   <exec_depend>roscpp</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>cv_bridge</exec_depend>
   <exec_depend>libopencv-dev</exec_depend>
+
+  <!-- Runtime des messages générés -->
+  <exec_depend>message_runtime</exec_depend>
 
 </package>

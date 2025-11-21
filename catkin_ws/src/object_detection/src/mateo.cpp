@@ -2,15 +2,23 @@
 #include "object_detection/detected_image.hpp"
 #include "object_detection/mateo.hpp"
 
+
+#include "object_detection/ObjectData.h"
+#include "object_detection/Piece.h"
+
 #define OFFSET_X 25
 #define OFFSET_Y 50 
 
 bool readytoProcess = false;
 ros::Publisher ready_pub;
+ros::Publisher data_camera;
 
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
     std_msgs::Bool ready_msg;
+    object_detection::ObjectData data;
+
+
     cout << "Image received." << endl;
 
     Mat pieces = cv_bridge::toCvShare(msg, "bgr8")->image;
@@ -39,63 +47,100 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     bitwise_and(pieces, pieces, filtre_bleu, mask_bleu);
     bitwise_and(pieces, pieces, filtre_noir, mask_noir);
 
-        Moments m_rouge = moments(mask_rouge, true);
-        if (m_rouge.m00 > 1000) {   // seuil pour éviter le bruit
-            int cx_rouge = m_rouge.m10 / m_rouge.m00 - OFFSET_X;
-            int cy_rouge = m_rouge.m01 / m_rouge.m00 + OFFSET_Y;
-            circle(pieces, Point(cx_rouge, cy_rouge), 6, Scalar(0,0,0), -1);
-            cout << "Centre rouge: (" << cx_rouge << ", " << cy_rouge << ")\n";
-        }
-        else
-        {
-            cout << "Aucune pièce rouge détectée." << endl;
-        }
+    bool presence_rouge, presence_vert, presence_bleu, presence_noir;
 
+    Moments m_rouge = moments(mask_rouge, true);
+    presence_rouge = (m_rouge.m00 > 1000);
+    float cx_rouge = 0;
+    float cy_rouge = 0;
+    float cx_rouge_cm = 0;
+    float cy_rouge_cm = 0;
+    if (presence_rouge) {   // seuil pour éviter le bruit
+        cx_rouge = m_rouge.m10 / m_rouge.m00 - OFFSET_X;
+        cy_rouge = m_rouge.m01 / m_rouge.m00 + OFFSET_Y;
+        circle(pieces, Point(cx_rouge, cy_rouge), 6, Scalar(0,0,0), -1);
+        cout << "Centre rouge: (" << cx_rouge << ", " << cy_rouge << ")\n";
+    }
+    else
+    {
+        cout << "Aucune pièce rouge détectée." << endl;
+    }
 
-        Moments m_vert = moments(mask_vert, true);
-        if (m_vert.m00 > 1000) {
-            int cx_vert = m_vert.m10 / m_vert.m00 - OFFSET_X;
-            int cy_vert = m_vert.m01 / m_vert.m00 + OFFSET_Y;
-            cout << "Centre pièce verte : (" << cx_vert << ", " << cy_vert << ")" << endl;
-            circle(pieces, Point(cx_vert, cy_vert), 6, Scalar(0, 0, 0), -1);
-        }
-        else
-        {
-            cout << "Aucune pièce verte détectée." << endl;
-        }
+    Moments m_vert = moments(mask_vert, true);
+    presence_vert = (m_vert.m00 > 1000);
+    float cx_vert = 0;
+    float cy_vert = 0;
+    float cx_vert_cm = 0;
+    float cy_vert_cm = 0;
+    if (presence_vert) {
+        cx_vert = m_vert.m10 / m_vert.m00 - OFFSET_X;
+        cy_vert = m_vert.m01 / m_vert.m00 + OFFSET_Y;
+        cout << "Centre pièce verte : (" << cx_vert << ", " << cy_vert << ")" << endl;
+        circle(pieces, Point(cx_vert, cy_vert), 6, Scalar(0, 0, 0), -1);
+    }
+    else
+    {
+        cout << "Aucune pièce verte détectée." << endl;
+    }
 
-        Moments m_bleu = moments(mask_bleu, true);
-        if (m_bleu.m00 > 1000) {
-            int cx_bleu = m_bleu.m10 / m_bleu.m00 - OFFSET_X;
-            int cy_bleu = m_bleu.m01 / m_bleu.m00 + OFFSET_Y;
-            cout << "Centre pièce bleue : (" << cx_bleu << ", " << cy_bleu << ")" << endl;
-            circle(pieces, Point(cx_bleu, cy_bleu), 6, Scalar(0, 0, 0), -1);
-        }
-        else
-        {
-            cout << "Aucune pièce bleue détectée." << endl;
-        }
+    Moments m_bleu = moments(mask_bleu, true);
+    presence_bleu = (m_bleu.m00 > 1000);
+    float cx_bleu = 0;
+    float cy_bleu = 0;
+    float cx_bleu_cm = 0;
+    float cy_bleu_cm = 0;
+    if (presence_bleu) {
+        cx_bleu = m_bleu.m10 / m_bleu.m00 - OFFSET_X;
+        cy_bleu = m_bleu.m01 / m_bleu.m00 + OFFSET_Y;
+        cout << "Centre pièce bleue : (" << cx_bleu << ", " << cy_bleu << ")" << endl;
+        circle(pieces, Point(cx_bleu, cy_bleu), 6, Scalar(0, 0, 0), -1);
+    }
+    else
+    {
+        cout << "Aucune pièce bleue détectée." << endl;
+    }
 
-        Moments m_noir = moments(mask_noir, true);
-        if (m_noir.m00 > 1000) {
-            int cx_noir = m_noir.m10 / m_noir.m00 - OFFSET_X;
-            int cy_noir = m_noir.m01 / m_noir.m00 + OFFSET_Y;
-            cout << "Centre pièce noire : (" << cx_noir << ", " << cy_noir << ")" << endl;
-            circle(pieces, Point(cx_noir, cy_noir), 6, Scalar(255, 255, 255), -1);
-        }
-        else
-        {
-            cout << "Aucune pièce noire détectée." << endl;
-        }
+    Moments m_noir = moments(mask_noir, true);
+    presence_noir = (m_noir.m00 > 1000);
+    float cx_noir = 0;
+    float cy_noir = 0;
+    float cx_noir_cm = 0;
+    float cy_noir_cm = 0;
+    if (presence_noir) {
+        int cx_noir = m_noir.m10 / m_noir.m00 - OFFSET_X;
+        int cy_noir = m_noir.m01 / m_noir.m00 + OFFSET_Y;
+        cout << "Centre pièce noire : (" << cx_noir << ", " << cy_noir << ")" << endl;
+        circle(pieces, Point(cx_noir, cy_noir), 6, Scalar(255, 255, 255), -1);
+    }
+    else
+    {
+        cout << "Aucune pièce noire détectée." << endl;
+    }
 
     imshow("Centres des pièces", pieces);
     waitKey(1);
+
     if(readytoProcess)
     {
         cout << "Pub data" << endl;
         readytoProcess = false; // reset flag
         ready_msg.data = false;
         ready_pub.publish(ready_msg);
+
+        data.bleu.x = cx_bleu;
+        data.bleu.y = cy_bleu;
+        data.bleu.present = presence_bleu;
+        data.rouge.x = cx_rouge;
+        data.rouge.y = cy_rouge;
+        data.rouge.present = presence_rouge;
+        data.vert.x = cx_vert;
+        data.vert.y = cy_vert;
+        data.vert.present = presence_vert;
+        data.noir.x = cx_noir;
+        data.noir.y = cy_noir;
+        data.noir.present = presence_noir;
+
+        data_camera.publish(data);
         sleep(1);
     }
 }
@@ -115,10 +160,14 @@ int mateo(int argc, char** argv)
 
     namedWindow("camera", WINDOW_AUTOSIZE);
 
-    ready_pub = nh.advertise<std_msgs::Bool>("/processing_ready", 1);
+    //publishers
 
-    ros::Subscriber ready_sub = nh.subscribe("/processing_ready", 1, readyCallback);
+    ready_pub = nh.advertise<std_msgs::Bool>("/request_object_data", 1);
+    data_camera = nh.advertise<object_detection::ObjectData>("/object_data", 1);
 
+    //suscribers
+
+    ros::Subscriber ready_sub = nh.subscribe("/request_object_data", 1, readyCallback);
     ros::Subscriber sub = nh.subscribe("/camera/color/image_raw", 1, imageCallback);
 
     ros::spin();
