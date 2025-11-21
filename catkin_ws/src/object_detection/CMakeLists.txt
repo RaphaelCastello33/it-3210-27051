@@ -4,45 +4,71 @@ project(object_detection)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Find ROS packages and OpenCV
+### 1) Find ROS packages BEFORE messages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   geometry_msgs
   cv_bridge
+  roslib
+  std_msgs
+  message_generation
 )
+
+### OpenCV must be found separately
 find_package(OpenCV REQUIRED)
 
-# Define catkin package information
+### 2) List your messages
+add_message_files(
+  FILES
+  Piece.msg
+  ObjectData.msg
+)
+
+### 3) Generate message code
+generate_messages(
+  DEPENDENCIES std_msgs
+)
+
+### 4) Declare the package
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS roscpp sensor_msgs geometry_msgs cv_bridge
+  CATKIN_DEPENDS 
+    roscpp 
+    sensor_msgs 
+    geometry_msgs 
+    cv_bridge 
+    std_msgs
+    message_runtime
   DEPENDS OpenCV
 )
 
-# Specify include directories for headers
+### 5) Include directories
 include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
-  include
 )
 
-# Add an executable from the source files
-add_executable(image_detector_node src/detected_objects.cpp src/mateo.cpp src/francois.cpp src/detected_image.cpp)
+### 6) Executable
+add_executable(image_detector_node 
+  src/detected_objects.cpp 
+  src/mateo.cpp 
+  src/francois.cpp 
+  src/detected_image.cpp
+)
 
-# Link the executable with required libraries
+### 7) Link
 target_link_libraries(image_detector_node
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
 )
 
-# Install the executable so it can be used with `rosrun`
 install(TARGETS image_detector_node
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-# Install the image file to the appropriate location for runtime access
-install(FILES src/image.jpg DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/images)
+install(FILES src/image.jpg 
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/images
+)
