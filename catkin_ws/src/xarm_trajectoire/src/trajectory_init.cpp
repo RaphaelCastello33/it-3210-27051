@@ -60,24 +60,24 @@ struct coordinate get_coordinate(xarm_trajectoire::Data g_data){
     {
         c.obj_x = g_data.bleu.x + DELTA_X ;
         c.obj_y = g_data.bleu.y + DELTA_Y;
-        c.obj_z = g_data.bleu.z + DELTA_Z;
+        c.obj_z = DELTA_Z;
     }
     else if (g_data.rouge.present)
     {
         c.obj_x = g_data.rouge.x + DELTA_X;
         c.obj_y = g_data.rouge.y + DELTA_Y;
-        c.obj_z = g_data.rouge.z + DELTA_Z;
+        c.obj_z = DELTA_Z;
     }
     else if (g_data.vert.present)
     {
         c.obj_x = g_data.vert.x + DELTA_X;
         c.obj_y = g_data.vert.y + DELTA_Y;
-        c.obj_z = g_data.vert.z + DELTA_Z;
+        c.obj_z = DELTA_Z;
     }
 
     c.cross_x = g_data.croix.x+ DELTA_CROSS_X;
     c.cross_y = g_data.croix.y+ DELTA_CROSS_Y;
-    c.cross_z = g_data.croix.z+ DELTA_CROSS_Z;
+    c.cross_z = DELTA_CROSS_Z;
 
     return c;
 }
