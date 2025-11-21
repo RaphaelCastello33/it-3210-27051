@@ -1,11 +1,10 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(xarm_trajectoire)
 
-## =========================
-## 1. Trouver les paquets
-## =========================
+## 1) Trouver les paquets nécessaires
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  std_msgs
   geometry_msgs
   moveit_core
   moveit_ros_planning
@@ -14,26 +13,25 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
 )
 
-## =========================
-## 2. Messages
-## =========================
+## 2) Déclaration des messages
 add_message_files(
   FILES
-    Data.msg
+  ObjectPos.msg
+  Data.msg
 )
 
+## 3) Génération du code des messages
 generate_messages(
   DEPENDENCIES
-    geometry_msgs
-    std_msgs
+  std_msgs
+  geometry_msgs
 )
 
-## =========================
-## 3. Déclaration du package
-## =========================
+## 4) Déclaration du package catkin
 catkin_package(
   CATKIN_DEPENDS
     roscpp
+    std_msgs
     geometry_msgs
     moveit_core
     moveit_ros_planning
@@ -42,26 +40,23 @@ catkin_package(
     message_runtime
 )
 
-## =========================
-## 4. Include dirs
-## =========================
+## 5) Include dirs
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-## =========================
-## 5. Node C++ : trajectory_planner
-## =========================
+## 6) Node trajectory_planner
 add_executable(trajectory_planner
-  src/trajectory_planner.cpp
+  src/trajectory_init.cpp
 )
 
-## pour que le node dépende bien des messages générés
+## 7) S'assurer que les messages sont générés avant le node
 add_dependencies(trajectory_planner
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
 )
 
+## 8) Linker avec les libs ROS / MoveIt
 target_link_libraries(trajectory_planner
   ${catkin_LIBRARIES}
 )

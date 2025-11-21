@@ -2,16 +2,17 @@
 <package format="2">
   <name>xarm_trajectoire</name>
   <version>0.0.1</version>
-  <description>Trajectoires MoveIt pour xArm6</description>
+  <description>Trajectoire MoveIt pour xArm6</description>
 
   <maintainer email="team@enseirb.fr">ENSEIRB Team</maintainer>
   <license>BSD</license>
 
-  <!-- OBLIGATOIRE -->
+  <!-- Outil de build -->
   <buildtool_depend>catkin</buildtool_depend>
 
-  <!-- Dépendances de build -->
+  <!-- Dépendances pour la compilation -->
   <build_depend>roscpp</build_depend>
+  <build_depend>std_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>moveit_core</build_depend>
   <build_depend>moveit_ros_planning</build_depend>
@@ -21,6 +22,7 @@
 
   <!-- Dépendances à l'exécution -->
   <exec_depend>roscpp</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>moveit_core</exec_depend>
   <exec_depend>moveit_ros_planning</exec_depend>
@@ -28,7 +30,7 @@
   <exec_depend>moveit_msgs</exec_depend>
   <exec_depend>message_runtime</exec_depend>
 
-  <!-- Packages nécessaires pour la description + MoveIt xArm6 -->
+  <!-- Config MoveIt / description robot -->
   <exec_depend>xarm6_moveit_config</exec_depend>
   <exec_depend>xarm_description</exec_depend>
 
