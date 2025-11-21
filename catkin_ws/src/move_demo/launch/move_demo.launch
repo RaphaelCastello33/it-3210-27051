@@ -9,9 +9,9 @@
     <!-- set mode et state à 0 -->
     <node pkg="rosservice" type="rosservice" name="set_mode" args="call /xarm/set_mode '{mode: 0}'" output="screen"/>
     <node pkg="rosservice" type="rosservice" name="set_state" args="call /xarm/set_state '{state: 0}'" output="screen"/>
-    <!-- retour à la position de repos -->
+    <!-- retour à la position de repos (A tester)-->
     <node pkg="rosservice" type="rosservice" name="go_home" 
-        args="call /xarm/go_home '{speed: 0.35, acc: 7, is_radian: false, wait: true}'" 
+        args="call /xarm/go_home '{pose: [], mvvelo: 0.35, mvacc: 7, mvradii: 0, mvtime: 0}'" 
         output="screen"/>
     <!-- Fin de la tentative -->
 
