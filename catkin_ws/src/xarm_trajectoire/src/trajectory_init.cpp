@@ -111,7 +111,7 @@ int main(int argc, char** argv)
     // Publisher de trajectoire pour le groupe suivant
     ros::Publisher traj_pub = nh.advertise<std_msgs::Float64MultiArray>("planned_coordinate", 1);
     // Topic de requête envoyé au groupe caméra
-    ros::Publisher req_pub = nh.advertise<std_msgs::Bool>("request_object_data", 1, true);
+   // ros::Publisher req_pub = nh.advertise<std_msgs::Bool>("request_object_data", 1, true);
     // Subscriber vers les données des objets
     ros::Subscriber data_sub = nh.subscribe("object_data", 1, dataCallback);
 
@@ -126,11 +126,11 @@ int main(int argc, char** argv)
     }
     geometry_msgs::Pose home_pose = move_group.getCurrentPose().pose;
 
-    // 2) envoie de la requete au groupe caméra
-    std_msgs::Bool req;
-    req.data = true;
-    req_pub.publish(req);
-    ROS_INFO("trajectory_planner : requête envoyée sur /request_object_data");
+    // // 2) envoie de la requete au groupe caméra
+    // std_msgs::Bool req;
+    // req.data = true;
+    // req_pub.publish(req);
+    // ROS_INFO("trajectory_planner : requête envoyée sur /request_object_data");
 
     ROS_INFO("trajectory_planner en attente de /object_data ...");
     // attendre qu'on ait reçu au moins une Data
