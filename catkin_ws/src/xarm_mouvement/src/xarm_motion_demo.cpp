@@ -7,7 +7,7 @@
 
 #include <xarm_msgs/GripperMove.h>
 
-ros::Publisher success_pub;
+ros::Publisher request_pub;
 ros::ServiceClient gripper_client;
 
 static const double Z_OFFSET = 0.10;  // 10 cm
@@ -132,9 +132,9 @@ void coordsCallback(const std_msgs::Float64MultiArray::ConstPtr& msg)
     goToPose(home_pose);
 
     // FIN → success=false
-    std_msgs::Bool end;
-    end.data = false;
-    success_pub.publish(end);
+    std_msgs::Bool req;
+    req.data = true;
+    request_pub.publish(req);
 
     ROS_INFO("Sequence terminee");
 }
@@ -151,19 +151,13 @@ int main(int argc, char** argv)
     spinner.start();
 
     // Publisher success
-    success_pub = nh.advertise<std_msgs::Bool>("/task_success", 1);
+    request_pub = nh.advertise<std_msgs::Bool>("/request_object_data", 1);
 
     // Client pince (si robot réel)
     if (!gazebo_simulation)
         gripper_client = nh.serviceClient<xarm_msgs::GripperMove>("/xarm/gripper_move");
 
     ros::Duration(0.5).sleep();
-
-    // Demande de coordonnées
-    std_msgs::Bool ask;
-    ask.data = true;
-    success_pub.publish(ask);
-    ROS_INFO("success=true envoye (demande coordonnees)");
 
     // MoveIt
     move_group = new moveit::planning_interface::MoveGroupInterface("xarm6");
@@ -176,7 +170,16 @@ int main(int argc, char** argv)
     // Subscriber → reçoit les 6 coordonnées
     ros::Subscriber sub = nh.subscribe("/planned_coordinate", 1, coordsCallback);
 
-    ROS_INFO("Node Mouvement pret : En attente des coordonnees...");
-    ros::waitForShutdown();
+    // -------------------------------
+    // PREMIÈRE DEMANDE DE COORDONNÉES
+    // -------------------------------
+
+    std_msgs::Bool req;
+    req.data = true;
+    request_pub.publish(req);
+    ROS_INFO("Demande initiale envoyee -> request_object_data=true");
+
+    // Boucle ROS → callback gère tout
+    ros::spin();
     return 0;
 }
