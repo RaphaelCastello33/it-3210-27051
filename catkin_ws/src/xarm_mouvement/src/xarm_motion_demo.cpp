@@ -14,6 +14,7 @@ static const double Z_OFFSET = 0.10;  // 10 cm
 static const double MIN_Z = 0.05;     // sécurité
 
 moveit::planning_interface::MoveGroupInterface* move_group;
+moveit::planning_interface::MoveGroupInterface* gripper_group;
 geometry_msgs::Pose home_pose;
 
 // --------------------------------------------------------
@@ -25,32 +26,37 @@ bool gazebo_simulation = false;
 
 void openGripper()
 {
-    if (gazebo_simulation) {
-        ROS_WARN("Simulation: pince ignoree (open)");
-        return;
-    }
+    ROS_INFO("MoveIt: ouverture pince");
 
-    xarm_msgs::GripperMove srv;
-    srv.request.pulse_pos = 0;
-    if (!gripper_client.call(srv)){        
-        ROS_ERROR("Service pince (open) a echoue");
-    }
-    ROS_INFO("[MOUVEMENT] GRIPPER OPEN\n");    
+    std::map<std::string, double> target;
+    target["drive_joint"] = 0.0;   // position ouverte (à adapter si besoin)
+
+    gripper_group->setJointValueTarget(target);
+
+    moveit::planning_interface::MoveGroupInterface::Plan plan;
+    if (gripper_group->plan(plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS)
+        gripper_group->execute(plan);
+    else
+        ROS_ERROR("Echec planification ouverture pince");
+    ROS_INFO("[MOUVEMENT] GRIPPER OPEN\n"); 
 }
+
 
 void closeGripper()
 {
-    if (gazebo_simulation) {
-        ROS_WARN("Simulation: pince ignoree (close)");
-        return;
-    }
+    ROS_INFO("MoveIt: fermeture pince");
 
-    xarm_msgs::GripperMove srv;
-    srv.request.pulse_pos = 850;
-    if (!gripper_client.call(srv)){
-        ROS_ERROR("Service pince (close) a echoue");
-    }
-    ROS_INFO("[MOUVEMENT] GRIPPER CLOSE\n");    
+    std::map<std::string, double> target;
+    target["drive_joint"] = 0.85;   // position fermée (à ajuster selon ton XArm)
+
+    gripper_group->setJointValueTarget(target);
+
+    moveit::planning_interface::MoveGroupInterface::Plan plan;
+    if (gripper_group->plan(plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS)
+        gripper_group->execute(plan);
+    else
+        ROS_ERROR("Echec planification fermeture pince");
+    ROS_INFO("[MOUVEMENT] GRIPPER CLOSE\n");   
 }
 
 // --------------------------------------------------------
@@ -171,6 +177,10 @@ int main(int argc, char** argv)
     move_group = new moveit::planning_interface::MoveGroupInterface("xarm6");
     move_group->setPlanningTime(3.0);
     move_group->allowReplanning(true);
+
+    gripper_group = new moveit::planning_interface::MoveGroupInterface("xarm_gripper");
+    gripper_group->setPlanningTime(2.0);
+    gripper_group->allowReplanning(true);
 
     // Pose home
     home_pose = move_group->getCurrentPose().pose;
