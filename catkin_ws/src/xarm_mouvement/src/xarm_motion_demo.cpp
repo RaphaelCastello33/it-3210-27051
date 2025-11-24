@@ -179,7 +179,8 @@ int main(int argc, char** argv)
     request_pub.publish(req);
     ROS_INFO("Demande initiale envoyee -> request_object_data=true");
 
-    // Boucle ROS → callback gère tout
-    ros::spin();
+    // Attendre que ROS se termine (le spinner tourne déjà)
+    ros::waitForShutdown();
     return 0;
+
 }
