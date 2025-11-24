@@ -5,76 +5,117 @@
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <geometry_msgs/Pose.h>
 
-#include <xarm_api/xarm_ros_client.h>
+#include <xarm_msgs/GripperMove.h>
 
-xarm_api::XArmROSClient arm_client;
-ros::Publisher success_pub;
+ros::Publisher request_pub;
+ros::ServiceClient gripper_client;
 
-static const double Z_OFFSET = 0.10;   // 10 cm au-dessus de l'objet
+static const double Z_OFFSET = 0.10;  // 10 cm
+static const double MIN_Z = 0.05;     // sécurité
 
 moveit::planning_interface::MoveGroupInterface* move_group;
 geometry_msgs::Pose home_pose;
 
-// Déplacement MoveIt vers une pose
+// --------------------------------------------------------
+//      FONCTIONS PINCE
+//      (désactivées automatiquement en simulation Gazebo)
+// --------------------------------------------------------
+
+bool gazebo_simulation = false;
+
+void openGripper()
+{
+    if (gazebo_simulation) {
+        ROS_WARN("Simulation: pince ignoree (open)");
+        return;
+    }
+
+    xarm_msgs::GripperMove srv;
+    srv.request.pulse_pos = 0;
+    if (!gripper_client.call(srv))
+        ROS_ERROR("Service pince (open) a echoue");
+}
+
+void closeGripper()
+{
+    if (gazebo_simulation) {
+        ROS_WARN("Simulation: pince ignoree (close)");
+        return;
+    }
+
+    xarm_msgs::GripperMove srv;
+    srv.request.pulse_pos = 850;
+    if (!gripper_client.call(srv))
+        ROS_ERROR("Service pince (close) a echoue");
+}
+
+// --------------------------------------------------------
+//      FONCTION MOUVEMENT
+// --------------------------------------------------------
+
 bool goToPose(const geometry_msgs::Pose& target)
 {
     move_group->setPoseTarget(target);
 
     moveit::planning_interface::MoveGroupInterface::Plan plan;
-    if (move_group->plan(plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS)
-    {
-        move_group->execute(plan);
-        ROS_INFO("Mouvement exécuté");
-        ros::Duration(0.5).sleep();
-        return true;
+    auto result = move_group->plan(plan);
+
+    if (result != moveit::planning_interface::MoveItErrorCode::SUCCESS) {
+        ROS_ERROR("Echec planification : pose impossible");
+        return false;
     }
-    ROS_WARN("Planification impossible");
-    return false;
+
+    move_group->execute(plan);
+    ros::Duration(0.3).sleep();
+    return true;
 }
 
-// Fonctions ouverture/fermeture pince
-void openGripper()  { arm_client.gripperMove(0);   ros::Duration(0.3).sleep(); }
-void closeGripper() { arm_client.gripperMove(850); ros::Duration(0.3).sleep(); }
+// --------------------------------------------------------
+//      CALLBACK COORDONNÉES
+// --------------------------------------------------------
 
-// Callback : reçoit les coordonnées
 void coordsCallback(const std_msgs::Float64MultiArray::ConstPtr& msg)
 {
     if (msg->data.size() != 6) {
-        ROS_ERROR("Erreur: message doit contenir 6 doubles");
+        ROS_ERROR("Message invalide : 6 valeurs requises");
         return;
     }
 
-    ROS_INFO("Coordonnées reçues, début du mouvement.");
+    ROS_INFO("Coordonnees recues -> debut sequence");
 
-    double px = msg->data[0];
-    double py = msg->data[1];
-    double pz = msg->data[2];
-
-    double cx = msg->data[3];
-    double cy = msg->data[4];
-    double cz = msg->data[5];
+    double px = msg->data[0], py = msg->data[1], pz = msg->data[2];
+    double cx = msg->data[3], cy = msg->data[4], cz = msg->data[5];
 
     geometry_msgs::Pose pose = home_pose;
 
-    // ------------------- SÉQUENCE DE MOUVEMENT -------------------
+    // -------------------------------
+    //       SÉQUENCE POUR LA PIECE
+    // -------------------------------
 
     goToPose(home_pose);
 
+    // Aller au-dessus de la pièce
     pose.position.x = px;
     pose.position.y = py;
     goToPose(pose);
 
     openGripper();
 
+    // Descendre
     pose.position.z = -pz + Z_OFFSET;
     goToPose(pose);
 
     closeGripper();
 
+    // Remonter
     pose.position.z = pz - Z_OFFSET;
     goToPose(pose);
 
     goToPose(home_pose);
+
+    // -------------------------------
+    //        Déposer sur la croix
+    // -------------------------------
 
     pose.position.x = cx;
     pose.position.y = cy;
@@ -90,13 +131,17 @@ void coordsCallback(const std_msgs::Float64MultiArray::ConstPtr& msg)
 
     goToPose(home_pose);
 
-    // FIN : envoyer FALSE (mouvement terminé)
-    std_msgs::Bool end;
-    end.data = false;
-    success_pub.publish(end);
+    // FIN → success=false
+    std_msgs::Bool req;
+    req.data = true;
+    request_pub.publish(req);
 
-    ROS_INFO("Séquence complète terminée - success=false envoyé.");
+    ROS_INFO("Sequence terminee");
 }
+
+// --------------------------------------------------------
+//                     MAIN
+// --------------------------------------------------------
 
 int main(int argc, char** argv)
 {
@@ -105,32 +150,36 @@ int main(int argc, char** argv)
     ros::AsyncSpinner spinner(1);
     spinner.start();
 
-    // 1) Créer le publisher AVANT toute publication
-    success_pub = nh.advertise<std_msgs::Bool>("/task_success", 1);
-    ros::Duration(0.5).sleep();  // temps pour que ROS initialise le publisher
+    // Publisher success
+    request_pub = nh.advertise<std_msgs::Bool>("/request_object_data", 1);
 
-    // 2) Envoyer success=true pour dire "je suis prêt, envoyez les coords"
-    std_msgs::Bool ask;
-    ask.data = true;
-    success_pub.publish(ask);
-    ROS_INFO("[Mouvement] success=true envoyé (demande coordonnées)");
+    // Client pince (si robot réel)
+    if (!gazebo_simulation)
+        gripper_client = nh.serviceClient<xarm_msgs::GripperMove>("/xarm/gripper_move");
 
-    // 3) Initialisation XArm API
-    arm_client.init(nh);
+    ros::Duration(0.5).sleep();
 
-    // 4) Initialisation MoveIt
+    // MoveIt
     move_group = new moveit::planning_interface::MoveGroupInterface("xarm6");
     move_group->setPlanningTime(3.0);
     move_group->allowReplanning(true);
 
-    // 5) Stocker la pose de départ (home)
+    // Pose home
     home_pose = move_group->getCurrentPose().pose;
 
-    // 6) Subscriber des coordonnées provenant du groupe trajectoire
+    // Subscriber → reçoit les 6 coordonnées
     ros::Subscriber sub = nh.subscribe("/planned_coordinate", 1, coordsCallback);
 
-    ROS_INFO("[Mouvement] Node prêt. En attente des coords...");
+    // -------------------------------
+    // PREMIÈRE DEMANDE DE COORDONNÉES
+    // -------------------------------
 
-    ros::waitForShutdown();
+    std_msgs::Bool req;
+    req.data = true;
+    request_pub.publish(req);
+    ROS_INFO("Demande initiale envoyee -> request_object_data=true");
+
+    // Boucle ROS → callback gère tout
+    ros::spin();
     return 0;
 }

@@ -40,25 +40,25 @@ add_executable(xarm_motion_demo
   src/xarm_motion_demo.cpp
   )
 
-add_executable(move_xarm6_sim
-  src/move_xarm6_sim.cpp
-  )
+# add_executable(move_xarm6_sim
+#   src/move_xarm6_sim.cpp
+#   )
 
 
 target_link_libraries(xarm_motion_demo
   ${catkin_LIBRARIES}
 )
 
-target_link_libraries(move_xarm6_sim
-  ${catkin_LIBRARIES}
-)
+# target_link_libraries(move_xarm6_sim
+#   ${catkin_LIBRARIES}
+# )
 
-add_dependencies(move_xarm6_sim ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(move_xarm6_sim ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(xarm_motion_demo
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
 )
 
-install(TARGETS move_xarm6_sim
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+# install(TARGETS move_xarm6_sim
+#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+# )

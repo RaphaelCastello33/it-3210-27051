@@ -1,55 +1,60 @@
 #include <ros/ros.h>
-#include <trajectory_msgs/JointTrajectory.h>
-#include <trajectory_msgs/JointTrajectoryPoint.h>
+#include <geometry_msgs/Point.h>
+#include <xarm_msgs/Move.h>  // Service Move du SDK XArm
+
+ros::ServiceClient move_line_client;
+
+// Callback appelé à chaque point reçu
+void pointCallback(const geometry_msgs::Point::ConstPtr& msg)
+{
+    xarm_msgs::Move srv;
+
+    // Position cible (x, y, z + orientation en radians)
+    srv.request.pose.resize(6);
+    srv.request.pose[0] = msg->x;
+    srv.request.pose[1] = msg->y;
+    srv.request.pose[2] = msg->z;
+    srv.request.pose[3] = 0.0; // roll
+    srv.request.pose[4] = 0.0; // pitch
+    srv.request.pose[5] = 0.0; // yaw
+
+    // Accélération et temps minimal
+    srv.request.mvacc  = 1000.0; // mm/s²
+    srv.request.mvtime = 0.0;    // min time
+
+    ROS_INFO_STREAM("Commande xarm vers x=" << msg->x
+                    << ", y=" << msg->y
+                    << ", z=" << msg->z);
+
+    // Appel du service move_line
+    if (move_line_client.call(srv))
+    {
+        if (srv.response.ret == 0)
+            ROS_INFO("Déplacement réussi !");
+        else
+            ROS_ERROR_STREAM("Déplacement échoué, code retour: " << srv.response.ret);
+    }
+    else
+    {
+        ROS_ERROR("Impossible d'appeler le service /xarm/move_line");
+    }
+}
+
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "xarm6_sim_trajectory");
+    ros::init(argc, argv, "xarm6_cartesian_point_commander");
     ros::NodeHandle nh;
 
-    ros::Publisher traj_pub = nh.advertise<trajectory_msgs::JointTrajectory>(
-        "/xarm/xarm6_traj_controller/command", 10);
+    // Client pour le service move_line du XArm
+    move_line_client = nh.serviceClient<xarm_msgs::Move>("/xarm/move_line");
 
-    // Attendre que le publisher soit prêt
-    ros::Duration(1.0).sleep();
+    // Subscriber : écoute en continu sur le topic des coordonnées planifiées
+    ros::Subscriber point_sub = nh.subscribe("/planned_coordinate", 10, pointCallback);
 
-    trajectory_msgs::JointTrajectory traj;
-    traj.joint_names = {"joint1","joint2","joint3","joint4","joint5","joint6"};
+    ROS_INFO("Nœud prêt, écoute en continu sur /planned_coordinate...");
 
-    // Point 1
-    trajectory_msgs::JointTrajectoryPoint point1;
-    point1.positions = {0.2, -0.5, 0.3, 0.1, 1.0, -0.2};
-    point1.time_from_start = ros::Duration(2.0);
-
-    // Point 2
-    trajectory_msgs::JointTrajectoryPoint point2;
-    point2.positions = {0.0, -0.3, 0.5, 0.4, 0.8, 0.0};
-    point2.time_from_start = ros::Duration(4.0);
-
-    // Point 3
-    trajectory_msgs::JointTrajectoryPoint point3;
-    point3.positions = {-0.3, 0.0, 0.7, 0.6, 0.5, 0.3};
-    point3.time_from_start = ros::Duration(6.0);
-
-    // Point 4
-    trajectory_msgs::JointTrajectoryPoint point4;
-    point4.positions = {0.3, -0.2, 0.2, -0.4, 1.2, -0.5};
-    point4.time_from_start = ros::Duration(8.0);
-
-    // Ajouter tous les points à la trajectoire
-    traj.points.push_back(point1);
-    traj.points.push_back(point2);
-    traj.points.push_back(point3);
-    traj.points.push_back(point4);
-
-    // Publier la trajectoire
-    ROS_INFO("Sending trajectory to xarm6_traj_controller...");
-    traj_pub.publish(traj);
-
-    ros::spinOnce();
-    ros::Duration(0.5).sleep(); // Laisser le temps au message d’être pris en compte
-
-    ROS_INFO("Trajectory sent.");
+    ros::spin();  // reste actif et appelle pointCallback à chaque message
 
     return 0;
 }
