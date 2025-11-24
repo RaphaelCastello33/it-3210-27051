@@ -34,4 +34,7 @@
   <exec_depend>xarm6_moveit_config</exec_depend>
   <exec_depend>xarm_description</exec_depend>
 
+  <build_depend>object_detection</build_depend>
+  <exec_depend>object_detection</exec_depend>
+
 </package>

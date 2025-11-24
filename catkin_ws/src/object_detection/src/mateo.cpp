@@ -21,7 +21,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     object_detection::ObjectData data;
 
 
-    cout << "Image received." << endl;
+    // cout << "Image received." << endl;
 
     Mat pieces = cv_bridge::toCvShare(msg, "bgr8")->image;
 
@@ -71,11 +71,11 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
         cy_rouge_cm = (cy_rouge + OFFSET_Y) / PX_PER_CM;
 
         circle(pieces, Point(cx_rouge, cy_rouge), 6, Scalar(0,0,0), -1);
-        cout << "Centre rouge: (" << cx_rouge << ", " << cy_rouge << ")\n";
+        //cout << "Centre rouge: (" << cx_rouge << ", " << cy_rouge << ")\n";
     }
     else
     {
-        cout << "Aucune pièce rouge détectée." << endl;
+        //cout << "Aucune pièce rouge détectée." << endl;
     }
 
     Moments m_vert = moments(mask_vert, true);
@@ -97,12 +97,12 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
         cx_vert_cm = (cx_vert - OFFSET_X) / PX_PER_CM;
         cy_vert_cm = (cy_vert + OFFSET_Y) / PX_PER_CM;
 
-        cout << "Centre pièce verte : (" << cx_vert << ", " << cy_vert << ")" << endl;
+        //cout << "Centre pièce verte : (" << cx_vert << ", " << cy_vert << ")" << endl;
         circle(pieces, Point(cx_vert, cy_vert), 6, Scalar(0, 0, 0), -1);
     }
     else
     {
-        cout << "Aucune pièce verte détectée." << endl;
+        //cout << "Aucune pièce verte détectée." << endl;
     }
 
     Moments m_bleu = moments(mask_bleu, true);
@@ -124,12 +124,12 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
         cx_bleu_cm = (cx_bleu - OFFSET_X) / PX_PER_CM;
         cy_bleu_cm = (cy_bleu + OFFSET_Y) / PX_PER_CM;
 
-        cout << "Centre pièce bleue : (" << cx_bleu << ", " << cy_bleu << ")" << endl;
+       // cout << "Centre pièce bleue : (" << cx_bleu << ", " << cy_bleu << ")" << endl;
         circle(pieces, Point(cx_bleu, cy_bleu), 6, Scalar(0, 0, 0), -1);
     }
     else
     {
-        cout << "Aucune pièce bleue détectée." << endl;
+        //cout << "Aucune pièce bleue détectée." << endl;
     }
 
     Moments m_noir = moments(mask_noir, true);
@@ -151,12 +151,12 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
         cx_noir_cm = (cx_noir - OFFSET_X) / PX_PER_CM;
         cy_noir_cm = (cy_noir + OFFSET_Y) / PX_PER_CM;
 
-        cout << "Centre pièce noire : (" << cx_noir << ", " << cy_noir << ")" << endl;
+        // cout << "Centre pièce noire : (" << cx_noir << ", " << cy_noir << ")" << endl;
         circle(pieces, Point(cx_noir, cy_noir), 6, Scalar(255, 255, 255), -1);
     }
     else
     {
-        cout << "Aucune pièce noire détectée." << endl;
+        // cout << "Aucune pièce noire détectée." << endl;
     }
 
     imshow("Centres des pièces", pieces);

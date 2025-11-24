@@ -32,8 +32,10 @@ void openGripper()
 
     xarm_msgs::GripperMove srv;
     srv.request.pulse_pos = 0;
-    if (!gripper_client.call(srv))
+    if (!gripper_client.call(srv)){        
         ROS_ERROR("Service pince (open) a echoue");
+    }
+    ROS_INFO("[MOUVEMENT] GRIPPER OPEN\n");    
 }
 
 void closeGripper()
@@ -45,8 +47,10 @@ void closeGripper()
 
     xarm_msgs::GripperMove srv;
     srv.request.pulse_pos = 850;
-    if (!gripper_client.call(srv))
+    if (!gripper_client.call(srv)){
         ROS_ERROR("Service pince (close) a echoue");
+    }
+    ROS_INFO("[MOUVEMENT] GRIPPER CLOSE\n");    
 }
 
 // --------------------------------------------------------
@@ -64,8 +68,11 @@ bool goToPose(const geometry_msgs::Pose& target)
         ROS_ERROR("Echec planification : pose impossible");
         return false;
     }
+    ROS_INFO("[MOUVEMENT] ok to move\n");
 
     move_group->execute(plan);
+
+    ROS_INFO("[MOUVEMENT] mouvement termine gros\n")
     ros::Duration(0.3).sleep();
     return true;
 }
@@ -131,12 +138,13 @@ void coordsCallback(const std_msgs::Float64MultiArray::ConstPtr& msg)
 
     goToPose(home_pose);
 
+    ROS_INFO("Sequence terminee");
+
     // FIN → success=false
     std_msgs::Bool req;
     req.data = true;
     request_pub.publish(req);
 
-    ROS_INFO("Sequence terminee");
 }
 
 // --------------------------------------------------------

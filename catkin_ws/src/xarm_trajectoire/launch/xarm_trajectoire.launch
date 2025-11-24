@@ -1,3 +1,5 @@
 <launch>
+    <!--ok -->
+<node pkg="xarm_trajectoire" type="trajectory_planner" name="trajectory_planner" output="screen"/>
 
 </launch>

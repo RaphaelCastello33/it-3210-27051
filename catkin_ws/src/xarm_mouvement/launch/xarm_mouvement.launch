@@ -1,3 +1,4 @@
 <launch>
+    <!-- ok  -->
     <node pkg="xarm_mouvement" type="xarm_motion_demo" name="xarm_motion_demo" output="screen"/>
 </launch>
