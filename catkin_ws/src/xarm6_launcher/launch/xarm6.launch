@@ -1,15 +1,20 @@
 <launch>
-
-  <include file="$(find xarm6_gripper_moveit_config)/launch/realMove_exec.launch">
+  <!-- <include file="$(find xarm_bringup)/launch/xarm6_server.launch">
           <arg name="robot_ip" value="192.168.1.208"/>
+  </include> -->
+  <include file="$(find xarm6_moveit_config)/launch/realMove_exec.launch">
+          <arg name="robot_ip" value="192.168.1.208"/>
+          <!-- <arg name="show_rviz" value="false"/> -->
   </include>
+
   <!-- tentative d'automatisation des 3 services -->
   <!-- activation des servo -->
   <!-- <node pkg="rosservice" type="rosservice" name="motion_ctrl" args="call /xarm/motion_ctrl '{servo_id: 8, value: 1}'" output="screen"/> -->
   <!-- set mode et state à 0 -->
   <!-- <node pkg="rosservice" type="rosservice" name="set_mode" args="call /xarm/set_mode '{mode: 0}'" output="screen"/> -->
   <!-- <node pkg="rosservice" type="rosservice" name="set_state" args="call /xarm/set_state '{state: 0}'" output="screen"/> -->
-
+  
+  
   <!-- Inclut le launch du package 1 -->
   <include file="$(find xarm_mouvement)/launch/xarm_mouvement.launch"/>
 
@@ -18,7 +23,5 @@
 
   <!-- Inclut le launch du package 3 -->
   <include file="$(find object_detection)/launch/object_detection.launch"/>
-
-  <!-- Inclut le launch de démo -->
 
 </launch>

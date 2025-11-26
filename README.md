@@ -62,6 +62,6 @@ rosservice call /xarm/set_state 0
 rosservice call /xarm/go_home [] 0.35 7 0 0
 
 # déplacer le robot
-rosservice call /xarm/move_line_tool [50,100,100,0,0,0] 200 2000 0 0 
+rosservice call /xarm/move_line_tool [200,0,0,0,0,0] 200 2000 0 0 
 # ici, on a : delta_x = 50; delta_y = 100; delta_z = 100; vitesse = 200; accélération = 2000
 ```

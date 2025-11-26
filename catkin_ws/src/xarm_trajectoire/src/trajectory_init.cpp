@@ -21,10 +21,10 @@ typedef double float64;
 
 #define DELTA_X 0.0
 #define DELTA_Y 0.0
-#define DELTA_Z 0.0
+#define DELTA_Z 40.0 // 4 cm??
 #define DELTA_CROSS_X  0.0
 #define DELTA_CROSS_Y  0.0
-#define DELTA_CROSS_Z  0.0
+#define DELTA_CROSS_Z  40.0 // 4 cm?
 
 struct coordinate{
     float64 obj_x;

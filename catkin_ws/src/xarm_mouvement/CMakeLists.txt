@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   trajectory_msgs
   message_generation
   xarm_api
+  xarm_msgs
 )
 
 
@@ -24,9 +25,14 @@ generate_messages(
   trajectory_msgs
 )
 
-catkin_package(
-
-  CATKIN_DEPENDS roscpp std_msgs moveit_ros_planning_interface trajectory_msgs message_runtime xarm_api
+catkin_package(CATKIN_DEPENDS 
+  roscpp
+  std_msgs 
+  moveit_ros_planning_interface 
+  trajectory_msgs 
+  message_runtime 
+  xarm_api
+  xarm_msgs
 )
 
 

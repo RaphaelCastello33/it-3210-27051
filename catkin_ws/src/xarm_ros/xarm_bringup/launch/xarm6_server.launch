@@ -12,7 +12,7 @@
   <arg name="baud_checkset" default="true" />
 	<arg name="default_gripper_baud" default="2000000" />
   <arg name="show_rviz" default="false" />
-  <arg name="add_gripper" default="false" />
+  <arg name="add_gripper" default="true" />
   <arg name="joint_state_flags" default="-1" />
 
   <rosparam file="$(find xarm6_moveit_config)/config/xarm6_params.yaml" command="load" ns="$(arg ns)"/>
