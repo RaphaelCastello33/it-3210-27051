@@ -85,49 +85,30 @@ public:
     // ======================================================
 
 
-    void confGripper() {
-    // [Error] : il ne reconnait pas xarm_msgs::GripperConfig alors que : https://github.com/xArm-Developer/xarm_ros/blob/master/xarm_msgs/srv/GripperConfig.srv    
-        xarm_msgs::GripperConfig srv;
-        srv.request.pulse_vel = 3000.0;
-        if (gripper_speed_client.call(srv)) {
-            ROS_INFO("[MOUVEMENT] Gripper speed configure !");
-        }
-
+void openGripper() {
+    if (gazebo_simulation) {
+        ROS_WARN("Simulation: pince ignoree (open)");
+        return;
     }
-
-void openGripper()
-{
-    ROS_INFO("MoveIt: ouverture pince");
-
-    std::map<std::string, double> target;
-    target["drive_joint"] = 0.0;   // position ouverte (à adapter si besoin)
-
-    gripper_group->setJointValueTarget(target);
-
-    moveit::planning_interface::MoveGroupInterface::Plan plan;
-    if (gripper_group->plan(plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS)
-        gripper_group->execute(plan);
+    xarm_msgs::GripperMove srv;
+    srv.request.pulse_pos = 850;
+    if (!gripper_client.call(srv))
+        ROS_ERROR("Erreur ouverture pince");
     else
-        ROS_ERROR("Echec planification ouverture pince");
-    ROS_INFO("[MOUVEMENT] GRIPPER OPEN\n"); 
+        ROS_INFO("[PINCE] OPEN");
 }
 
-
-void closeGripper()
-{
-    ROS_INFO("MoveIt: fermeture pince");
-
-    std::map<std::string, double> target;
-    target["drive_joint"] = 0.85;   // position fermée (à ajuster selon ton XArm)
-
-    gripper_group->setJointValueTarget(target);
-
-    moveit::planning_interface::MoveGroupInterface::Plan plan;
-    if (gripper_group->plan(plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS)
-        gripper_group->execute(plan);
+void closeGripper() {
+    if (gazebo_simulation) {
+        ROS_WARN("Simulation: pince ignoree (close)");
+        return;
+    }
+    xarm_msgs::GripperMove srv;
+    srv.request.pulse_pos = 0;
+    if (!gripper_client.call(srv))
+        ROS_ERROR("Erreur fermeture pince");
     else
-        ROS_ERROR("Echec planification fermeture pince");
-    ROS_INFO("[MOUVEMENT] GRIPPER CLOSE\n");   
+        ROS_INFO("[PINCE] CLOSE");
 }
 
     // ======================================================
