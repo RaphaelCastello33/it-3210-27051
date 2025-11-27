@@ -22,7 +22,7 @@ rosservice call /xarm/set_state 0
 rosservice call /xarm/go_home [] 0.35 7 0 0
 
 # Move away from table for security
-rosservice call /xarm/move_line_tool [200,0,0,0,0,0] 200 2000 0 0 
+rosservice call /xarm/move_line_tool [200,0,-250,0,0,0] 200 2000 0 0 
 
 # Gripper Enabler
 rosservice call /xarm/gripper_config 1500
