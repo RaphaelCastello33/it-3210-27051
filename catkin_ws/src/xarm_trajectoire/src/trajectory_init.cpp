@@ -21,10 +21,13 @@ typedef double float64;
 
 #define DELTA_X 0.0
 #define DELTA_Y 0.0
-#define DELTA_Z 40.0 // 4 cm??
+#define DELTA_Z_MM 150.0 // 15 cm
+
 #define DELTA_CROSS_X  0.0
 #define DELTA_CROSS_Y  0.0
-#define DELTA_CROSS_Z  40.0 // 4 cm?
+#define DELTA_CROSS_Z_MM  150.0 // 15 cm
+
+#define CM_TO_MM_RATIO 10.0
 
 struct coordinate{
     float64 obj_x;
@@ -44,32 +47,31 @@ struct coordinate get_coordinate(object_detection::ObjectData g_data){
     struct coordinate c;
     if (g_data.bleu.present)
     {
-        c.obj_x = (g_data.bleu.x + DELTA_X)/1;
-        c.obj_y = (g_data.bleu.y + DELTA_Y)/1;
-        c.obj_z = DELTA_Z;
+        c.obj_x = (CM_TO_MM_RATIO * (g_data.bleu.x + DELTA_X));
+        c.obj_y = (CM_TO_MM_RATIO * (g_data.bleu.y + DELTA_Y));
+        c.obj_z = DELTA_Z_MM;
     }
     else if (g_data.rouge.present)
     {
-        c.obj_x = (g_data.rouge.x + DELTA_X)/1;
-        c.obj_y = (g_data.rouge.y + DELTA_Y)/1;
-        c.obj_z = DELTA_Z;
+        c.obj_x = (CM_TO_MM_RATIO * (g_data.rouge.x + DELTA_X));
+        c.obj_y = (CM_TO_MM_RATIO * (g_data.rouge.y + DELTA_Y));
+        c.obj_z = DELTA_Z_MM;
     }
     else if (g_data.vert.present)
     {
-        c.obj_x = (g_data.vert.x + DELTA_X)/1;
-        c.obj_y = (g_data.vert.y + DELTA_Y)/1;
-        c.obj_z = DELTA_Z;
+        c.obj_x = (CM_TO_MM_RATIO * (g_data.vert.x + DELTA_X));
+        c.obj_y = (CM_TO_MM_RATIO * (g_data.vert.y + DELTA_Y));
+        c.obj_z = DELTA_Z_MM;
     }
 
-    c.cross_x = (g_data.croix.x+ DELTA_CROSS_X)/1;
-    c.cross_y = (g_data.croix.y+ DELTA_CROSS_Y)/1;
-    c.cross_z = DELTA_CROSS_Z;
+    c.cross_x = (CM_TO_MM_RATIO * (g_data.croix.x+ DELTA_CROSS_X));
+    c.cross_y = (CM_TO_MM_RATIO * (g_data.croix.y+ DELTA_CROSS_Y));
+    c.cross_z = DELTA_CROSS_Z_MM;
 
     return c;
 }
 
 void Publish_traj(ros::Publisher pub, struct coordinate c){
-    ROS_INFO("3333333333333333333333333333333333333333333333\n");
     std_msgs::Float64MultiArray msg;
 
     msg.data.push_back(c.obj_x);
@@ -78,6 +80,7 @@ void Publish_traj(ros::Publisher pub, struct coordinate c){
     msg.data.push_back(c.cross_x);
     msg.data.push_back(c.cross_y);
     msg.data.push_back(c.cross_z);
+
 
     pub.publish(msg);   
 }
@@ -122,15 +125,15 @@ int main(int argc, char** argv)
     ros::Subscriber data_sub = nh.subscribe("object_data", 1, dataCallback);
 
     // 1) aller à home
-    ROS_INFO("Aller en position 'home'...");
-    move_group.setNamedTarget("home");   // adapter si votre named target a un autre nom
-    moveit::planning_interface::MoveItErrorCode move_res = move_group.move();
-    if (move_res != moveit::planning_interface::MoveItErrorCode::SUCCESS)
-    {
-        ROS_ERROR("Echec du mouvement vers 'home'. Abandon.");
-        return 0;
-    }
-    geometry_msgs::Pose home_pose = move_group.getCurrentPose().pose;
+    // ROS_INFO("Aller en position 'home'...");
+    // move_group.setNamedTarget("home");   // adapter si votre named target a un autre nom
+    // moveit::planning_interface::MoveItErrorCode move_res = move_group.move();
+    // if (move_res != moveit::planning_interface::MoveItErrorCode::SUCCESS)
+    // {
+    //     ROS_ERROR("Echec du mouvement vers 'home'. Abandon.");
+    //     return 0;
+    // }
+    // geometry_msgs::Pose home_pose = move_group.getCurrentPose().pose;
 
 
     // attendre qu'on ait reçu au moins une Data

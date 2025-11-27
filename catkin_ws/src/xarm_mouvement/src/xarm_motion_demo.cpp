@@ -9,8 +9,7 @@
 #include <xarm_msgs/Move.h>
 // #include <xarm_msgs/MoveToolLine.h>
 
-static const double Z_OFFSET = 0.10;
-static const double MIN_Z = 0.05;
+#define Z_OFFSET 0
 
 // ======================================================
 //                CLASSE XarmController
@@ -33,7 +32,6 @@ public:
     // Coordonnées courantes
     double px, py, pz;
     double cx, cy, cz;
-
     // --------------------------
     //        CONSTRUCTEUR
     // --------------------------
@@ -48,13 +46,9 @@ public:
         gripper_speed_client = nh.serviceClient<xarm_msgs::GripperConfig>("xarm/gripper_config");
         gripper_client = nh.serviceClient<xarm_msgs::GripperMove>("/xarm/gripper_move");
         
-        ROS_INFO("[MOUVEMENT] Conf du gripper speed...");
+        // ROS_INFO("[MOUVEMENT] Conf du gripper speed...");
         // confGripper();
 
-        system("rosservice call /xarm/motion_ctrl 8 1");    // triche
-        system("rosservice call /xarm/set_mode 0");         // triche
-        system("rosservice call /xarm/set_state 0");        // triche
-        system("rosservice call /xarm/gripper_config 1500"); // triche
         
         // MoveIt
         move_group = new moveit::planning_interface::MoveGroupInterface("xarm6");
@@ -121,7 +115,7 @@ void closeGripper() {
     // ROS_INFO("[MOUVEMENT]  target -> .x=%.3f .y=%.3f", target.position.x, target.position.y);
     // returns : .x=0.207, .y=0.000
     srv.request.pose = {
-        target.position.x+200, // offset de 200 au cas où
+        target.position.x, // offset de 200 au cas où
         target.position.y,
         target.position.z,
         0, 0, 0
@@ -155,6 +149,18 @@ void closeGripper() {
     //                 CALLBACK COORDONNÉES
     // ======================================================
 
+    /**
+     * Algo be like :
+     *  [Init] = Trajectory_init nous mets en position hom
+     *  [Init] = +200 en x pour avoir une sécu avec le bord de table (la premiere fois seulement)
+     *      (**) .x = px .y = py --> au dessus de l'objet
+     *      (**) gripper open
+     *      (**) .x = 0; .y = 0; .z = -pz --> on bouge pas plus loiin et on descend
+     *      (**) gripper close
+     *      (**) .x = 0; .y = 0; .z = +pz --> on bouge pas plus loiin et on remonte
+     *      (**) .x = -px .y = -py; .z = 0 --> Retour position initiale
+     *      (**) rebelotte avec la cross
+     */
     void coordsCallback(const std_msgs::Float64MultiArray::ConstPtr& msg)
     {           
         ROS_INFO("[MOUVEMENT] Dans la callback !!\n");
@@ -163,33 +169,27 @@ void closeGripper() {
             return;
         }
         ROS_INFO("[MOUVEMENT] /////////////////////////// Debut de la sequence \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
-        // Stockage dans l'objet
-        px = msg->data[0]*100;
-        py = msg->data[1]*100;
-        pz = msg->data[2]*100;
-        cx = msg->data[3]*100;
-        cy = msg->data[4]*100;
-        cz = msg->data[5]*100;
-
+        // ---------------------------------------
+        //    Stockage dans l'objet
+        // ---------------------------------------
+        px = msg->data[0];
+        py = msg->data[1];
+        pz = msg->data[2];
+        cx = msg->data[3];
+        cy = msg->data[4];
+        cz = msg->data[5];
         
-        ROS_INFO("[MOUVEMENT]  Coordonnees recues -> px=%.3f py=%.3f", px, py);
-        ROS_INFO("[MOUVEMENT]  Coordonnees recues -> cx=%.3f cy=%.3f", cx, cy);
-        // returns : px=127, py=539
-        // returns : cx=127, cy=539
-        
+        ROS_INFO("[MOUVEMENT]  Coordonnees recues -> px=%.3f py=%.3f pz=%.3f", px, py, pz); 
+        ROS_INFO("[MOUVEMENT]  Coordonnees recues -> cx=%.3f cy=%.3f cz=%.3f", cx, cy, cz);
         geometry_msgs::Pose pose = home_pose;
+
+
         // ---------------------------------------
         //    Récupération de la pièce
         // ---------------------------------------
-        goToPose(home_pose);
-        ros::Duration(2.0).sleep();
-        ROS_INFO("[MOUVEMENT] Home 1 ok !\n");
-
-
         pose.position.x = px;
         pose.position.y = py;
-        // ROS_INFO("[MOUVEMENT]  Coordonnees ecrit dans pose.position -> .x=%.3f .y=%.3f", pose.position.x, pose.position.y );
-
+        pose.position.z = 0;
         goToPose(pose);
         ros::Duration(2.0).sleep();
         ROS_INFO("[MOUVEMENT] au dessus de l'objet ok !\n");
@@ -200,7 +200,10 @@ void closeGripper() {
         ros::Duration(2.0).sleep();
         ROS_INFO("[MOUVEMENT] Gripper Open ok !\n");
 
-        pose.position.z = -pz + Z_OFFSET;
+
+        pose.position.x = 0;
+        pose.position.y = 0;
+        pose.position.z = pz;
         goToPose(pose);
         ros::Duration(2.0).sleep();
         ROS_INFO("[MOUVEMENT] Descendre sur l'objet ok !\n");
@@ -210,25 +213,34 @@ void closeGripper() {
         ros::Duration(2.0).sleep();
         ROS_INFO("[MOUVEMENT] Gripper Close ok !\n");
 
-        pose.position.z = pz - Z_OFFSET;
+        pose.position.x = 0;
+        pose.position.y = 0;
+        pose.position.z = -pz;
         goToPose(pose);
         ros::Duration(2.0).sleep();
         ROS_INFO("[MOUVEMENT] Remonter ok !\n");
 
-        goToPose(home_pose);
+  
+        pose.position.x = -px;
+        pose.position.y = -py;
+        pose.position.z = 0;
+        goToPose(pose);
+        ROS_INFO("[MOUVEMENT] \t--- Back to Home ---\n");
         ros::Duration(2.0).sleep();
-        ROS_INFO("[MOUVEMENT] Home 2 ok !\n");
 
         // ---------------------------------------
         //    Dépôt sur la croix
         // ---------------------------------------
         pose.position.x = cx;
         pose.position.y = cy;
+        pose.position.z = 0;
         goToPose(pose);
         ros::Duration(2.0).sleep();
         ROS_INFO("[MOUVEMENT] Aller sur la croix ok !\n");
 
-        pose.position.z = -cz + Z_OFFSET;
+        pose.position.x = 0;
+        pose.position.y = 0;
+        pose.position.z = cz;
         goToPose(pose);
         ros::Duration(2.0).sleep();
         ROS_INFO("[MOUVEMENT] Descendre sur la croix ok !\n");
@@ -237,16 +249,19 @@ void closeGripper() {
         ros::Duration(2.0).sleep();
         ROS_INFO("[MOUVEMENT] Gripper Open ok !\n");
         
-
-        pose.position.z = cz - Z_OFFSET;
+        pose.position.x = 0;
+        pose.position.y = 0;
+        pose.position.z = -cz;
         goToPose(pose);
         ros::Duration(2.0).sleep();
         ROS_INFO("[MOUVEMENT] Remonter ok !\n");
 
-
-        goToPose(home_pose);
+        pose.position.x = -cx;
+        pose.position.y = -cy;
+        pose.position.z = 0;
+        goToPose(pose);
+        ROS_INFO("[MOUVEMENT] \t--- Back to Home ---\n");
         ros::Duration(2.0).sleep();
-        ROS_INFO("[MOUVEMENT] Home 3 ok !\n");
 
         ROS_INFO("[MOUVEMENT] /////////////////////////// Sequence terminee \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
         ROS_INFO("\n");
@@ -275,7 +290,7 @@ int main(int argc, char** argv)
     ros::AsyncSpinner spinner(1);
     spinner.start();
 
-    ros::Duration(5.0).sleep();
+    ros::Duration(10.0).sleep();
 
 
     ROS_INFO("[MOUVEMENT] Avant création de l'objet\n");
