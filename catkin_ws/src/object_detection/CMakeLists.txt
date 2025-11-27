@@ -21,8 +21,8 @@ find_package(OpenCV REQUIRED)
 ### 2) List your messages
 add_message_files(
   FILES
-  Piece.msg
   ObjectData.msg
+  Piece.msg
 )
 
 ### 3) Generate message code
@@ -58,6 +58,10 @@ add_executable(image_detector_node
   src/francois.cpp 
   src/detected_image.cpp
 )
+
+add_dependencies(image_detector_node
+${catkin_EXPORTED_TARGETS}
+${object_detection_EXPORTED_TARGETS})
 
 ### 7) Link
 target_link_libraries(image_detector_node

@@ -54,6 +54,7 @@ add_executable(trajectory_planner
 add_dependencies(trajectory_planner
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
+  object_detection_generate_messages_cpp
 )
 
 ## 8) Linker avec les libs ROS / MoveIt

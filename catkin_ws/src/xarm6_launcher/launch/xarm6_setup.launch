@@ -1,0 +1,10 @@
+<launch>
+
+  <include file="$(find xarm6_moveit_config)/launch/realMove_exec.launch">
+    <arg name="robot_ip" value="192.168.1.208"/>
+  </include>
+
+  <!-- Script d'initialisation -->
+  <node pkg="xarm6_launcher" type="start.sh" name="start" output="screen"/>
+
+</launch>
