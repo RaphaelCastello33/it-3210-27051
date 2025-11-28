@@ -18,14 +18,20 @@ const double Z_VERT  = 0.10;
 // Hauteur de la croix
 const double Z_CROIX = 0.10;
 typedef double float64;
+#define HOME_INIT -250
 
 #define DELTA_X 0.0
 #define DELTA_Y 0.0
-#define DELTA_Z_MM 150.0 // 15 cm
+#define DELTA_Z_MM 150.0 //- HOME_INIT// 15 cm
 
 #define DELTA_CROSS_X  0.0
 #define DELTA_CROSS_Y  0.0
-#define DELTA_CROSS_Z_MM  150.0 // 15 cm
+#define DELTA_CROSS_Z_MM  150.0 //- HOME_INIT// 15 cm
+
+#define RED_Z_OFFSET    80 // cm
+#define GREEN_Z_OFFSET  85 // cm
+#define BLUE_Z_OFFSET   90 // cm
+#define CROSS_Z_OFFSET  92 // cm
 
 #define CM_TO_MM_RATIO 10.0
 
@@ -48,25 +54,25 @@ struct coordinate get_coordinate(object_detection::ObjectData g_data){
     if (g_data.bleu.present)
     {
         c.obj_x = (CM_TO_MM_RATIO * (g_data.bleu.x + DELTA_X));
-        c.obj_y = (CM_TO_MM_RATIO * (g_data.bleu.y + DELTA_Y));
-        c.obj_z = DELTA_Z_MM;
+        c.obj_y = -(CM_TO_MM_RATIO * (g_data.bleu.y + DELTA_Y));
+        c.obj_z = DELTA_Z_MM + BLUE_Z_OFFSET;
     }
     else if (g_data.rouge.present)
     {
         c.obj_x = (CM_TO_MM_RATIO * (g_data.rouge.x + DELTA_X));
-        c.obj_y = (CM_TO_MM_RATIO * (g_data.rouge.y + DELTA_Y));
-        c.obj_z = DELTA_Z_MM;
+        c.obj_y = -(CM_TO_MM_RATIO * (g_data.rouge.y + DELTA_Y));
+        c.obj_z = DELTA_Z_MM + RED_Z_OFFSET;
     }
     else if (g_data.vert.present)
     {
         c.obj_x = (CM_TO_MM_RATIO * (g_data.vert.x + DELTA_X));
-        c.obj_y = (CM_TO_MM_RATIO * (g_data.vert.y + DELTA_Y));
-        c.obj_z = DELTA_Z_MM;
+        c.obj_y = -(CM_TO_MM_RATIO * (g_data.vert.y + DELTA_Y));
+        c.obj_z = DELTA_Z_MM + GREEN_Z_OFFSET;
     }
 
     c.cross_x = (CM_TO_MM_RATIO * (g_data.croix.x+ DELTA_CROSS_X));
-    c.cross_y = (CM_TO_MM_RATIO * (g_data.croix.y+ DELTA_CROSS_Y));
-    c.cross_z = DELTA_CROSS_Z_MM;
+    c.cross_y = -(CM_TO_MM_RATIO * (g_data.croix.y+ DELTA_CROSS_Y));
+    c.cross_z = DELTA_CROSS_Z_MM + CROSS_Z_OFFSET;
 
     return c;
 }
@@ -114,11 +120,7 @@ int main(int argc, char** argv)
     ros::AsyncSpinner spinner(1);
     spinner.start();
     ROS_INFO("[Trajectory] Trajectory lancé");
-    // MoveIt
-    moveit::planning_interface::MoveGroupInterface move_group("xarm6");
-    move_group.setPoseReferenceFrame("link_base");
-    move_group.setMaxVelocityScalingFactor(0.3);
-    move_group.setMaxAccelerationScalingFactor(0.3);
+
 
     // Publisher de trajectoire pour le groupe suivant
     traj_pub = nh.advertise<std_msgs::Float64MultiArray>("planned_coordinate", 1);

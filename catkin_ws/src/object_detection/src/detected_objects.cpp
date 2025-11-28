@@ -75,7 +75,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     }
     else
     {
-        cout << "Aucune pièce rouge détectée." << endl;
+        // cout << "Aucune pièce rouge détectée." << endl;
     }
 
     Moments m_vert = moments(mask_vert, true);
@@ -102,7 +102,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     }
     else
     {
-        cout << "Aucune pièce verte détectée." << endl;
+        // cout << "Aucune pièce verte détectée." << endl;
     }
 
     Moments m_bleu = moments(mask_bleu, true);
@@ -129,7 +129,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     }
     else
     {
-        cout << "Aucune pièce bleue détectée." << endl;
+        // cout << "Aucune pièce bleue détectée." << endl;
     }
 
     Moments m_noir = moments(mask_noir, true);
@@ -156,7 +156,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     }
     else
     {
-        cout << "Aucune pièce noire détectée." << endl;
+        // cout << "Aucune pièce noire détectée." << endl;
     }
 
     imshow("Centres des pièces", pieces);
@@ -169,7 +169,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
         ready_msg.data = false;
         ready_pub.publish(ready_msg);
 
-        cout << "Image dimensions: " << W << "x" << H << endl;
+        // cout << "Image dimensions: " << W << "x" << H << endl;
 
         data.bleu.x = cx_bleu_cm;
         data.bleu.y = cy_bleu_cm;
