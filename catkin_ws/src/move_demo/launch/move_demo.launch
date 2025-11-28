@@ -1,5 +1,0 @@
-<launch>
-    <launch>
-        <node pkg="xarm_trajectoire" type="trajectory_init" name="trajectory_init" output="screen"/>
-    </launch>
-</launch>

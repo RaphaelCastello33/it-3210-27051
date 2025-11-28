@@ -28,7 +28,7 @@ typedef double float64;
 #define DELTA_CROSS_Y  0.0
 #define DELTA_CROSS_Z_MM  150.0 //- HOME_INIT// 15 cm
 
-#define RED_Z_OFFSET    80 // cm
+#define RED_Z_OFFSET    83 // cm
 #define GREEN_Z_OFFSET  85 // cm
 #define BLUE_Z_OFFSET   90 // cm
 #define CROSS_Z_OFFSET  92 // cm
