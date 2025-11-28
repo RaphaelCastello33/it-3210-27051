@@ -54,9 +54,6 @@ include_directories(
 ### 6) Executable
 add_executable(image_detector_node 
   src/detected_objects.cpp 
-  src/mateo.cpp 
-  src/francois.cpp 
-  src/detected_image.cpp
 )
 
 add_dependencies(image_detector_node
